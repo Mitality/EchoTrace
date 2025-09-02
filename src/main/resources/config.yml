@@ -1,0 +1,73 @@
+#  ___    _       _____
+# | __|__| |_  __|_   _| _ __ _ __ ___
+# | _|/ _| ' \/ _ \| || '_/ _` / _/ -_)
+# |___\__|_||_\___/|_||_| \__,_\__\___|
+#   EchoTrace v${project.version}, Minecraft 1.21+
+
+# Set a prefix to be prepended to all plugin messages
+# Can use MiniMessage and Legacy message formatting
+prefix: "&8&l[&3&lEchoTrace&8&l] &r"
+
+# Set a language file to use from plugins/EchoTrace/language
+# You may define your own and set it here without the '.yml'
+language: en
+
+# EchoTrace always checks for updates once on startup
+# A check is then carried out at the specified interval
+# [hours] When set to 0, no further checks are scheduled
+update-check-interval: 12
+
+# Whether to only check for full releases, or for any version
+# When set to false, EchoTrace also notifies you, when a new
+# prerelease or dev version of itself or an addon is available
+releases-only: true
+
+# Whether only the player executing the command should
+# be able to see and hear the summoned echo trace
+client-side: true
+
+# Settings related to an ongoing trace
+tracing:
+
+  # Particle to spawn (disable with count 0)
+  particle:
+    type: SOUL_FIRE_FLAME
+    speed: 0.0
+    count: 1
+
+  # Sound to play (disable with volume 0)
+  sound:
+    type: BLOCK_SCULK_CATALYST_BLOOM
+    volume: 0.75
+    pitch: 0.5
+
+  # How far to step forward each time
+  # (always keep this value positive)
+  step-size: 0.5
+
+  # How many game ticks to wait,
+  # before stepping forward again
+  interval: 1
+
+# Traces hitting the targeted player
+on-hit:
+
+  # Particle to spawn (disable with count 0)
+  particle:
+    type: SOUL_FIRE_FLAME
+    speed: 0.25
+    count: 10
+
+  # Sound to play (disable with volume 0)
+  sound:
+    type: BLOCK_SCULK_SHRIEKER_BREAK
+    volume: 0.75
+    pitch: 0.25
+
+# How many points to draw when
+# no count has been provided
+default-points: -1
+
+# How many degrees to turn towards
+# the right direction each run
+turn-rate: 10.0

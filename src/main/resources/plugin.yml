@@ -1,0 +1,34 @@
+name: EchoTrace
+version: '1.0.0'
+main: echoTrace.Main
+api-version: '1.21'
+authors: [ Mitality ]
+description: Easily find your friends
+commands:
+
+  echotrace:
+    aliases:
+      - et
+    permissions:
+      echotrace.reload:
+        description: Allows reloading the system
+        default: op
+      echotrace.trace:
+        description: Allows using the add command
+        default: true
+      echotrace.*:
+        default: op
+        children:
+          echotrace.reload: true
+          echotrace.trace: true
+
+  trace:
+    aliases:
+      - t
+    permission: echotrace.trace
+
+permissions:
+
+  echotrace.update-notify:
+    description: Notifies the player when the plugin has an update available.
+    default: op

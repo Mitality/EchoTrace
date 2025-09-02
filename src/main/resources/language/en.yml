@@ -1,0 +1,37 @@
+commands:
+
+  echotrace:
+
+    # Message shown for incorrect command usage
+    usage: '&bUsage: /echotrace <subcommand>'
+
+    # Message shown for invalid subcommands
+    invalid: '&cInvalid action. Please use a valid subcommand.'
+
+    # Message shown if a command is player-only but used from the console
+    player-only: '&cThis subcommand may only be executed by players.'
+
+    # Message shown if the player lacks permission for a command
+    not-permitted: '&cYou do not have permission to use this command.'
+
+    reload:
+
+      # Message shown on successful configuration reload
+      success: '&aConfiguration reloaded.'
+
+      # Message shown if reload fails
+      failure: '&cConfiguration could not be reloaded.'
+
+    trace:
+
+      # Message shown for incorrect command usage
+      usage: '&bUsage: /echotrace trace <player> [point count]'
+
+      # Message shown when no valid target player could be retrieved
+      no-target: '&cPlayer {Player} is not online.'
+
+      # Message shown when the target player is in a different world
+      wrong-world: '&ePlayer {Player} is in a different world/dimension'
+
+      # Message shown on successful configuration reload
+      success: ''
