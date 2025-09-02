@@ -1,10 +1,10 @@
-package echoTrace.util;
+package echotrace.util;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import echoTrace.Main;
-import echoTrace.config.Config;
+import echotrace.Main;
+import echotrace.config.Config;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;

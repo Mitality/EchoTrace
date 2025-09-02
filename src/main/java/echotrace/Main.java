@@ -1,12 +1,12 @@
-package echoTrace;
+package echotrace;
 
 import com.tchristofferson.configupdater.ConfigUpdater;
-import echoTrace.commands.CommandManager;
-import echoTrace.config.Config;
-import echoTrace.config.Lang;
-import echoTrace.listeners.UpdateNotifyListener;
-import echoTrace.util.Logger;
-import echoTrace.util.UpdateChecker;
+import echotrace.commands.CommandManager;
+import echotrace.config.Config;
+import echotrace.config.Lang;
+import echotrace.listeners.UpdateNotifyListener;
+import echotrace.util.Logger;
+import echotrace.util.UpdateChecker;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;

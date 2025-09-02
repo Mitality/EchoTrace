@@ -1,4 +1,4 @@
-package echoTrace.depend;
+package echotrace.depend;
 
 import de.myzelyam.api.vanish.VanishAPI;
 import org.bukkit.Bukkit;

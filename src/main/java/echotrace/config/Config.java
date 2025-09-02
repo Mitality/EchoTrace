@@ -1,4 +1,4 @@
-package echoTrace.config;
+package echotrace.config;
 
 import org.bukkit.Particle;
 import org.bukkit.Sound;

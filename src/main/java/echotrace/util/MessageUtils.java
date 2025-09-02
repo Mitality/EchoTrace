@@ -1,7 +1,7 @@
-package echoTrace.util;
+package echotrace.util;
 
-import echoTrace.Main;
-import echoTrace.config.Config;
+import echotrace.Main;
+import echotrace.config.Config;
 import io.github.milkdrinkers.colorparser.ColorParser;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;

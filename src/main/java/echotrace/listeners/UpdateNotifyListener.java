@@ -1,8 +1,8 @@
-package echoTrace.listeners;
+package echotrace.listeners;
 
-import echoTrace.Main;
-import echoTrace.config.Config;
-import echoTrace.util.UpdateChecker;
+import echotrace.Main;
+import echotrace.config.Config;
+import echotrace.util.UpdateChecker;
 import io.github.milkdrinkers.colorparser.ColorParser;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;

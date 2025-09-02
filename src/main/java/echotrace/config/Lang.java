@@ -1,4 +1,4 @@
-package echoTrace.config;
+package echotrace.config;
 
 import org.bukkit.configuration.file.FileConfiguration;
 

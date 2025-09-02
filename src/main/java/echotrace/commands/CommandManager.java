@@ -1,10 +1,10 @@
-package echoTrace.commands;
+package echotrace.commands;
 
-import echoTrace.commands.subcommands.ReloadCommand;
-import echoTrace.commands.subcommands.TraceCommand;
-import echoTrace.config.Config;
-import echoTrace.config.Lang;
-import echoTrace.util.MessageUtils;
+import echotrace.commands.subcommands.ReloadCommand;
+import echotrace.commands.subcommands.TraceCommand;
+import echotrace.config.Config;
+import echotrace.config.Lang;
+import echotrace.util.MessageUtils;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;

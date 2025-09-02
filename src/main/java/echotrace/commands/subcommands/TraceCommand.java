@@ -1,11 +1,11 @@
-package echoTrace.commands.subcommands;
+package echotrace.commands.subcommands;
 
-import echoTrace.Main;
-import echoTrace.commands.SubCommand;
-import echoTrace.config.Config;
-import echoTrace.config.Lang;
-import echoTrace.depend.VanishPlugins;
-import echoTrace.util.MessageUtils;
+import echotrace.Main;
+import echotrace.commands.SubCommand;
+import echotrace.config.Config;
+import echotrace.config.Lang;
+import echotrace.depend.VanishPlugins;
+import echotrace.util.MessageUtils;
 import org.bukkit.*;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;

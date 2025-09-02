@@ -1,4 +1,4 @@
-package echoTrace.util;
+package echotrace.util;
 
 import org.bukkit.Bukkit;
 

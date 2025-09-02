@@ -1,4 +1,4 @@
-package echoTrace.commands;
+package echotrace.commands;
 
 import org.bukkit.command.CommandSender;
 

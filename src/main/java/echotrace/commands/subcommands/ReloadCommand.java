@@ -1,12 +1,12 @@
-package echoTrace.commands.subcommands;
+package echotrace.commands.subcommands;
 
 import com.tchristofferson.configupdater.ConfigUpdater;
-import echoTrace.Main;
-import echoTrace.commands.SubCommand;
-import echoTrace.config.Config;
-import echoTrace.config.Lang;
-import echoTrace.util.Logger;
-import echoTrace.util.MessageUtils;
+import echotrace.Main;
+import echotrace.commands.SubCommand;
+import echotrace.config.Config;
+import echotrace.config.Lang;
+import echotrace.util.Logger;
+import echotrace.util.MessageUtils;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
