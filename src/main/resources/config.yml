@@ -4,6 +4,8 @@
 # |___\__|_||_\___/|_||_| \__,_\__\___|
 #   EchoTrace v${project.version}, Minecraft 1.21+
 
+# Reload in game with /echotrace reload
+
 # Set a prefix to be prepended to all plugin messages
 # Can use MiniMessage and Legacy message formatting
 prefix: "&8&l[&3&lEchoTrace&8&l] &r"
