@@ -24,6 +24,7 @@ public class Config {
 
     public static double tracing_step_size;
     public static long tracing_interval;
+    public static long tracing_count;
 
     public static Particle on_hit_particle_type;
     public static double on_hit_particle_speed;
@@ -56,6 +57,8 @@ public class Config {
 
         tracing_step_size = config.getDouble("tracing.step-size", 0.5);
         tracing_interval = config.getLong("tracing.interval", 1);
+        tracing_count = config.getLong("tracing.count", 1);
+        if (tracing_count <= 0) tracing_count = Long.MAX_VALUE;
 
         on_hit_particle_type = Particle.valueOf(config.getString("on-hit.particle.type", "SOUL_FIRE_FLAME"));
         on_hit_particle_speed = config.getDouble("on-hit.particle.speed", 0.25);

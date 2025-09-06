@@ -39,14 +39,14 @@ public class TraceCommand implements SubCommand {
             return true;
         }
 
-        int point_count = Config.default_points;
+        int pointCount = Config.default_points;
         if (args.length > 2) {
             try {
-                point_count = Integer.parseInt(args[2]);
+                pointCount = Integer.parseInt(args[2]);
             } catch (NumberFormatException ignored) {
             }
         }
-        final int pointCount = point_count;
+        final int targetPointCount = pointCount;
 
         Location loc = player.getEyeLocation();
         AtomicInteger taskId = new AtomicInteger();
@@ -54,7 +54,7 @@ public class TraceCommand implements SubCommand {
         taskId.set(getServer().getScheduler().runTaskTimer(Main.getInstance(), new Runnable() {
 
             Vector currentDir = loc.getDirection().normalize();
-            int count = 0;
+            int pointCount = 0;
 
             @Override
             public void run() {
@@ -64,40 +64,47 @@ public class TraceCommand implements SubCommand {
                     return;
                 }
 
-                Vector toTarget = target.getEyeLocation().toVector().subtract(loc.toVector());
+                long count = 0;
+                while (count < Config.tracing_count) {
 
-                if (toTarget.lengthSquared() < 0.25) {
-                    if (Config.client_side) {
-                        player.spawnParticle(Config.on_hit_particle_type, loc, Config.on_hit_particle_count, 0.0, 0.0, 0.0, Config.on_hit_particle_speed, null, true);
-                        player.playSound(loc, Config.on_hit_sound_type, SoundCategory.MASTER, (float) Config.on_hit_sound_volume, (float) Config.on_hit_sound_pitch);
-                    } else {
-                        player.getWorld().spawnParticle(Config.on_hit_particle_type, loc, Config.on_hit_particle_count, 0.0, 0.0, 0.0, Config.on_hit_particle_speed, null, true);
-                        player.getWorld().playSound(loc, Config.on_hit_sound_type, SoundCategory.MASTER, (float) Config.on_hit_sound_volume, (float) Config.on_hit_sound_pitch);
+                    Vector toTarget = target.getEyeLocation().toVector().subtract(loc.toVector());
+
+                    if (toTarget.lengthSquared() < 0.25) {
+                        if (Config.client_side) {
+                            player.spawnParticle(Config.on_hit_particle_type, loc, Config.on_hit_particle_count, 0.0, 0.0, 0.0, Config.on_hit_particle_speed, null, true);
+                            player.playSound(loc, Config.on_hit_sound_type, SoundCategory.MASTER, (float) Config.on_hit_sound_volume, (float) Config.on_hit_sound_pitch);
+                        } else {
+                            player.getWorld().spawnParticle(Config.on_hit_particle_type, loc, Config.on_hit_particle_count, 0.0, 0.0, 0.0, Config.on_hit_particle_speed, null, true);
+                            player.getWorld().playSound(loc, Config.on_hit_sound_type, SoundCategory.MASTER, (float) Config.on_hit_sound_volume, (float) Config.on_hit_sound_pitch);
+                        }
+                        getServer().getScheduler().cancelTask(taskId.get());
+                        return;
                     }
-                    getServer().getScheduler().cancelTask(taskId.get());
-                    return;
-                }
 
-                Vector targetDir = toTarget.clone().normalize();
-                if (Config.turn_rate <= 0) {
-                    currentDir = targetDir;
-                } else {
-                    currentDir = turnTowards(currentDir, targetDir, Config.turn_rate);
-                }
-                loc.add(currentDir.clone().multiply(Config.tracing_step_size));
+                    Vector targetDir = toTarget.clone().normalize();
+                    if (Config.turn_rate <= 0) {
+                        currentDir = targetDir;
+                    } else {
+                        currentDir = turnTowards(currentDir, targetDir, Config.turn_rate);
+                    }
+                    loc.add(currentDir.clone().multiply(Config.tracing_step_size));
 
-                if (Config.client_side) {
-                    player.spawnParticle(Config.tracing_particle_type, loc, Config.tracing_particle_count, 0.0, 0.0, 0.0, Config.tracing_particle_speed, null, true);
-                    player.playSound(loc, Config.tracing_sound_type, SoundCategory.MASTER, (float) Config.tracing_sound_volume, (float) Config.tracing_sound_pitch);
-                } else {
-                    player.getWorld().spawnParticle(Config.tracing_particle_type, loc, Config.tracing_particle_count, 0.0, 0.0, 0.0, Config.tracing_particle_speed, null, true);
-                    player.getWorld().playSound(loc, Config.tracing_sound_type, SoundCategory.MASTER, (float) Config.tracing_sound_volume, (float) Config.tracing_sound_pitch);
-                }
+                    if (Config.client_side) {
+                        player.spawnParticle(Config.tracing_particle_type, loc, Config.tracing_particle_count, 0.0, 0.0, 0.0, Config.tracing_particle_speed, null, true);
+                        player.playSound(loc, Config.tracing_sound_type, SoundCategory.MASTER, (float) Config.tracing_sound_volume, (float) Config.tracing_sound_pitch);
+                    } else {
+                        player.getWorld().spawnParticle(Config.tracing_particle_type, loc, Config.tracing_particle_count, 0.0, 0.0, 0.0, Config.tracing_particle_speed, null, true);
+                        player.getWorld().playSound(loc, Config.tracing_sound_type, SoundCategory.MASTER, (float) Config.tracing_sound_volume, (float) Config.tracing_sound_pitch);
+                    }
 
-                count++;
+                    pointCount++;
 
-                if (pointCount > 0 && count + 1 > pointCount) {
-                    getServer().getScheduler().cancelTask(taskId.get());
+                    if (targetPointCount > 0 && pointCount + 1 > targetPointCount) {
+                        getServer().getScheduler().cancelTask(taskId.get());
+                        return;
+                    }
+
+                    count++;
                 }
 
             }

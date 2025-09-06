@@ -48,8 +48,12 @@ tracing:
   step-size: 0.5
 
   # How many game ticks to wait,
-  # before stepping forward again
+  # before continuing the trace
   interval: 1
+
+  # How many points to
+  # draw each interval
+  count: 1
 
 # Traces hitting the targeted player
 on-hit:
