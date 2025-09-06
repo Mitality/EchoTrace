@@ -19,7 +19,7 @@ update-check-interval: 12
 
 # Whether to only check for full releases, or for any version
 # When set to false, EchoTrace also notifies you, when a new
-# prerelease or dev version of itself or an addon is available
+# prerelease or development version is available on Modrinth
 releases-only: true
 
 # Whether only the player executing the command should
