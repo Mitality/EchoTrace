@@ -72,6 +72,7 @@ public class UpdateChecker {
                     Component message = Component.text()
                             .append(Component.text("[EchoTrace] Update available!", NamedTextColor.GRAY))
                             .appendNewline()
+                            .append(Component.text(" "))
                             .appendNewline()
                             .append(Component.text("  A new version of ", NamedTextColor.GREEN))
                             .append(Component.text(this.resourceName, NamedTextColor.GOLD))
@@ -84,6 +85,7 @@ public class UpdateChecker {
                             .appendNewline()
                             .append(Component.text(" ")) // Some consoles would ignore the last line without this
                             .build();
+                    Main.getAdventure().console().sendMessage(message);
 
                 } else {
                     Bukkit.getLogger().log(Level.INFO, "[EchoTrace] You are running the latest version of " + resourceName + " (v" + currentVersion + ")!");

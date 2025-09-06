@@ -1,5 +1,5 @@
 name: EchoTrace
-version: '1.0.0'
+version: '${project.version}'
 main: echotrace.Main
 api-version: '1.21'
 authors: [ Mitality ]
