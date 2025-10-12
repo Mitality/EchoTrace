@@ -28,7 +28,20 @@ public class TraceRenderer {
     }
 
     public static void queueRender(Player player, Location location, boolean isHit) {
-        renderQueue.add(new RenderRequest(player, location.clone(), isHit));
+
+        if (location.getWorld() == null) return;
+        World world = location.getWorld();
+
+        if (!TraceUtils.isChunkLoaded(world, location)) return;
+
+        if ( // Don't render points that are far away from any player
+            Bukkit.getOnlinePlayers().stream()
+                .filter(p -> p.getWorld().equals(world))
+                .mapToDouble(p -> p.getLocation().distance(location))
+                .min().orElse(Double.MAX_VALUE) > Config.render_distance
+        ) return;
+
+        renderQueue.add(new RenderRequest(player, location.clone(), world, isHit));
     }
 
     public static void flush() {
@@ -39,20 +52,8 @@ public class TraceRenderer {
         }
     }
 
-    private record RenderRequest(Player player, Location location, boolean isHit) {
+    private record RenderRequest(Player player, Location location, World world, boolean isHit) {
         void render() {
-            if (location.getWorld() == null) return;
-            World world = location.getWorld();
-
-            if (!TraceUtils.isChunkLoaded(world, location)) return;
-
-            if ( // Don't render points that are far away from any player
-                Bukkit.getOnlinePlayers().stream()
-                    .filter(p -> p.getWorld().equals(world))
-                    .mapToDouble(p -> p.getLocation().distance(location))
-                    .min().orElse(Double.MAX_VALUE) > Config.render_distance
-            ) return;
-
             if (isHit) renderHit(player, location, world);
             else renderStep(player, location, world);
         }
