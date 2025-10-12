@@ -1,12 +1,17 @@
 package echotrace;
 
+import com.github.Anon8281.universalScheduler.UniversalScheduler;
+import com.github.Anon8281.universalScheduler.scheduling.schedulers.TaskScheduler;
 import com.tchristofferson.configupdater.ConfigUpdater;
 import echotrace.commands.CommandManager;
 import echotrace.config.Config;
 import echotrace.config.Lang;
+import echotrace.core.TraceManager;
+import echotrace.core.TraceRenderer;
 import echotrace.listeners.UpdateNotifyListener;
 import echotrace.util.Logger;
 import echotrace.util.UpdateChecker;
+import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
@@ -20,7 +25,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.Objects;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -29,6 +33,7 @@ public final class Main extends JavaPlugin {
     private static Main instance;
     private static List<String> languages;
     private static BukkitAudiences adventure;
+    private static TaskScheduler scheduler;
 
     @Override
     public void onLoad() {
@@ -41,6 +46,9 @@ public final class Main extends JavaPlugin {
 
         // Load adventure
         adventure = BukkitAudiences.create(this);
+
+        // Load scheduler
+        scheduler = UniversalScheduler.getScheduler(this);
 
         // Reload and update config
         saveDefaultConfig();
@@ -93,8 +101,14 @@ public final class Main extends JavaPlugin {
         Lang.load(languageConfig);
 
         // Commands and Listeners
-        Objects.requireNonNull(getCommand("echotrace")).setExecutor(new CommandManager());
-        Objects.requireNonNull(getCommand("trace")).setExecutor(new CommandManager());
+        getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, event -> {
+            event.registrar().register(CommandManager.echotrace(), List.of("et"));
+            event.registrar().register(CommandManager.trace());
+        });
+
+        // Start heartbeat
+        TraceManager.startHeartbeat(); // async
+        TraceRenderer.startHeartbeat(); // sync
 
         // Check for updates
         UpdateChecker updateChecker = new UpdateChecker("EchoTrace", "echotrace", getDescription().getVersion()).checkNow();
@@ -120,6 +134,10 @@ public final class Main extends JavaPlugin {
 
     public static Main getInstance() {
         return instance;
+    }
+
+    public static TaskScheduler getScheduler() {
+        return scheduler;
     }
 
     public static List<String> getLanguages() {

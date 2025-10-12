@@ -28,6 +28,10 @@ releases-only: true
 # be able to see and hear the summoned echo trace
 client-side: true
 
+# How close must a player be to a location in order
+# for it to be rendered with particles? (in blocks)
+render-distance: 64
+
 # Settings related to an ongoing trace
 tracing:
 

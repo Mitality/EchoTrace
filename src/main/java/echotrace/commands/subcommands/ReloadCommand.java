@@ -1,23 +1,25 @@
 package echotrace.commands.subcommands;
 
+import com.mojang.brigadier.context.CommandContext;
 import com.tchristofferson.configupdater.ConfigUpdater;
 import echotrace.Main;
-import echotrace.commands.SubCommand;
 import echotrace.config.Config;
 import echotrace.config.Lang;
+import echotrace.core.TraceManager;
+import echotrace.core.TraceRenderer;
 import echotrace.util.Logger;
 import echotrace.util.MessageUtils;
-import org.bukkit.command.CommandSender;
+import io.papermc.paper.command.brigadier.CommandSourceStack;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
-import java.util.List;
 
-public class ReloadCommand implements SubCommand {
+import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
-    @Override
-    public boolean execute(CommandSender sender, String[] args) {
+public class ReloadCommand {
+
+    public static int execute(CommandContext<CommandSourceStack> ctx) {
 
         try {
 
@@ -54,27 +56,16 @@ public class ReloadCommand implements SubCommand {
             // Load language internally
             Lang.load(languageConfig);
 
-            MessageUtils.notifySender(sender, Config.prefix + Lang.echotrace_reload_success);
+            // Reset heartbeat
+            TraceManager.startHeartbeat(); // async
+            TraceRenderer.startHeartbeat(); // sync
+
+            MessageUtils.notifySender(ctx.getSource().getSender(), Config.prefix + Lang.echotrace_reload_success);
+            return SINGLE_SUCCESS;
         } catch (Exception e) {
-            MessageUtils.notifySender(sender, Config.prefix + Lang.echotrace_reload_fail);
-            Logger.logErr(e);
+            MessageUtils.notifySender(ctx.getSource().getSender(), Config.prefix + Lang.echotrace_reload_fail);
+            return 0;
         }
-        return true;
-    }
 
-    @Override
-    public List<String> tabComplete(CommandSender sender, String[] args) {
-        return List.of();
     }
-
-    @Override
-    public String permission() {
-        return "echotrace.reload";
-    }
-
-    @Override
-    public boolean playerOnly() {
-        return false;
-    }
-
 }

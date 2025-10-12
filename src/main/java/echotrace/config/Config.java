@@ -13,6 +13,7 @@ public class Config {
     public static boolean releases_only;
 
     public static boolean client_side;
+    public static long render_distance;
 
     public static Particle tracing_particle_type;
     public static double tracing_particle_speed;
@@ -46,6 +47,7 @@ public class Config {
         releases_only = config.getBoolean("releases-only", true);
 
         client_side = config.getBoolean("client-side", true);
+        render_distance = config.getLong("render-distance", 64);
 
         tracing_particle_type = Particle.valueOf(config.getString("tracing.particle.type", "SOUL_FIRE_FLAME"));
         tracing_particle_speed = config.getDouble("tracing.particle.speed", 0.0);

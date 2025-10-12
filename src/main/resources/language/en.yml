@@ -28,10 +28,10 @@ commands:
       usage: '&bUsage: /echotrace trace <player> [point count]'
 
       # Message shown when no valid target player could be retrieved
-      no-target: '&cPlayer {Player} is not online.'
+      no-target: '&cNo valid online player provided.'
 
       # Message shown when the target player is in a different world
       wrong-world: '&ePlayer {Player} is in a different world/dimension'
 
-      # Message shown on successful configuration reload
+      # Message shown on successful trace
       success: ''

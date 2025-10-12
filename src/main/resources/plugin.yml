@@ -1,4 +1,5 @@
 name: EchoTrace
+folia-supported: true
 version: '${project.version}'
 main: echotrace.Main
 api-version: '1.21'

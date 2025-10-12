@@ -1,160 +1,49 @@
 package echotrace.commands.subcommands;
 
-import echotrace.Main;
-import echotrace.commands.SubCommand;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import echotrace.config.Config;
 import echotrace.config.Lang;
+import echotrace.core.Trace;
+import echotrace.core.TraceManager;
+import echotrace.core.target.PlayerTarget;
 import echotrace.depend.VanishPlugins;
 import echotrace.util.MessageUtils;
-import org.bukkit.*;
-import org.bukkit.command.CommandSender;
+import io.papermc.paper.command.brigadier.CommandSourceStack;
+import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
 import org.bukkit.entity.Player;
-import org.bukkit.util.Vector;
 
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
+import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
-import static org.bukkit.Bukkit.getServer;
+public class TraceCommand {
 
-public class TraceCommand implements SubCommand {
+    public static int execute(CommandContext<CommandSourceStack> ctx, boolean hasPointsArg) {
 
-    @Override
-    public boolean execute(CommandSender sender, String[] args) {
+        final CommandSourceStack src = ctx.getSource();
+        if (!(src.getExecutor() instanceof Player player)) return SINGLE_SUCCESS; // shouldn't be possible to achieve
+        final PlayerSelectorArgumentResolver r = ctx.getArgument("target", PlayerSelectorArgumentResolver.class);
 
-        Player player = (Player) sender;
-
-        if (args.length < 2) {
-            MessageUtils.notifySender(sender, Config.prefix + Lang.echotrace_trace_usage);
-            return true;
+        Player target;
+        try {
+            target = r.resolve(src).getFirst();
+        } catch (CommandSyntaxException e) {
+            target = null;
         }
 
-        Player target = Bukkit.getPlayer(args[1]);
-        if (target == null) {
-            MessageUtils.notifySender(sender, Config.prefix + Lang.echotrace_trace_no_target.replace("{Player}", args[1]));
-            return true;
+        if (target == null || VanishPlugins.isVanished(target)) {
+            MessageUtils.notifyPlayer(player, Config.prefix + Lang.echotrace_trace_no_target);
+            return SINGLE_SUCCESS;
+        }
+        if (target.getWorld() != player.getWorld()) {
+            MessageUtils.notifyPlayer(player, Config.prefix + Lang.echotrace_trace_wrong_world.replace("{Player}", target.getName()));
+            return SINGLE_SUCCESS;
         }
 
-        if (target.getLocation().getWorld() != player.getLocation().getWorld()) {
-            MessageUtils.notifySender(sender, Config.prefix + Lang.echotrace_trace_wrong_world.replace("{Player}", args[1]));
-            return true;
-        }
+        int pointCount = hasPointsArg ? IntegerArgumentType.getInteger(ctx, "points") : Config.default_points;
 
-        int pointCount = Config.default_points;
-        if (args.length > 2) {
-            try {
-                pointCount = Integer.parseInt(args[2]);
-            } catch (NumberFormatException ignored) {
-            }
-        }
-        final int targetPointCount = pointCount;
-
-        Location loc = player.getEyeLocation();
-        AtomicInteger taskId = new AtomicInteger();
-
-        taskId.set(getServer().getScheduler().runTaskTimer(Main.getInstance(), new Runnable() {
-
-            Vector currentDir = loc.getDirection().normalize();
-            int pointCount = 0;
-
-            @Override
-            public void run() {
-
-                if (target.getLocation().getWorld() != player.getLocation().getWorld()) {
-                    getServer().getScheduler().cancelTask(taskId.get());
-                    return;
-                }
-
-                long count = 0;
-                while (count < Config.tracing_count) {
-
-                    Vector toTarget = target.getEyeLocation().toVector().subtract(loc.toVector());
-
-                    if (toTarget.lengthSquared() < 0.25) {
-                        if (Config.client_side) {
-                            player.spawnParticle(Config.on_hit_particle_type, loc, Config.on_hit_particle_count, 0.0, 0.0, 0.0, Config.on_hit_particle_speed, null, true);
-                            player.playSound(loc, Config.on_hit_sound_type, SoundCategory.MASTER, (float) Config.on_hit_sound_volume, (float) Config.on_hit_sound_pitch);
-                        } else {
-                            player.getWorld().spawnParticle(Config.on_hit_particle_type, loc, Config.on_hit_particle_count, 0.0, 0.0, 0.0, Config.on_hit_particle_speed, null, true);
-                            player.getWorld().playSound(loc, Config.on_hit_sound_type, SoundCategory.MASTER, (float) Config.on_hit_sound_volume, (float) Config.on_hit_sound_pitch);
-                        }
-                        getServer().getScheduler().cancelTask(taskId.get());
-                        return;
-                    }
-
-                    Vector targetDir = toTarget.clone().normalize();
-                    if (Config.turn_rate <= 0) {
-                        currentDir = targetDir;
-                    } else {
-                        currentDir = turnTowards(currentDir, targetDir, Config.turn_rate);
-                    }
-                    loc.add(currentDir.clone().multiply(Config.tracing_step_size));
-
-                    if (Config.client_side) {
-                        player.spawnParticle(Config.tracing_particle_type, loc, Config.tracing_particle_count, 0.0, 0.0, 0.0, Config.tracing_particle_speed, null, true);
-                        player.playSound(loc, Config.tracing_sound_type, SoundCategory.MASTER, (float) Config.tracing_sound_volume, (float) Config.tracing_sound_pitch);
-                    } else {
-                        player.getWorld().spawnParticle(Config.tracing_particle_type, loc, Config.tracing_particle_count, 0.0, 0.0, 0.0, Config.tracing_particle_speed, null, true);
-                        player.getWorld().playSound(loc, Config.tracing_sound_type, SoundCategory.MASTER, (float) Config.tracing_sound_volume, (float) Config.tracing_sound_pitch);
-                    }
-
-                    pointCount++;
-
-                    if (targetPointCount > 0 && pointCount + 1 > targetPointCount) {
-                        getServer().getScheduler().cancelTask(taskId.get());
-                        return;
-                    }
-
-                    count++;
-                }
-
-            }
-        }, 0L, Config.tracing_interval).getTaskId());
-
-        MessageUtils.notifySender(sender, Config.prefix + Lang.echotrace_trace_success);
-        return true;
+        TraceManager.registerTrace(new Trace(player, new PlayerTarget(target), pointCount));
+        MessageUtils.notifyPlayer(player, Config.prefix + Lang.echotrace_trace_success);
+        return SINGLE_SUCCESS;
     }
-
-    @Override
-    public List<String> tabComplete(CommandSender sender, String[] args) {
-        if (args.length == 2) {
-            return Bukkit.getOnlinePlayers().stream()
-                    .filter(player -> !VanishPlugins.isVanished(player))
-                    .map(Player::getName).toList();
-        }
-        if (args.length == 3) {
-            return List.of("<point count>");
-        }
-        return List.of();
-    }
-
-    @Override
-    public String permission() {
-        return "echotrace.trace";
-    }
-
-    @Override
-    public boolean playerOnly() {
-        return true;
-    }
-
-    private Vector turnTowards(Vector from, Vector to, double maxDeg) {
-
-        Vector a = from.clone().normalize();
-        Vector b = to.clone().normalize();
-
-        double dot = Math.max(-1.0, Math.min(1.0, a.dot(b)));
-        double angle = Math.toDegrees(Math.acos(dot));
-        if (angle <= maxDeg || angle == 0.0) return b;
-
-        double t = maxDeg / angle; // 0..1
-        Vector blended = a.multiply(1.0 - t).add(b.multiply(t));
-        if (blended.lengthSquared() == 0.0) {
-            // 180° edge case (pick any perpendicular)
-            Vector perp = new Vector(-a.getZ(), 0, a.getX());
-            if (perp.lengthSquared() == 0.0) perp = new Vector(0, 1, 0);
-            return perp.normalize();
-        }
-        return blended.normalize();
-    }
-
 }

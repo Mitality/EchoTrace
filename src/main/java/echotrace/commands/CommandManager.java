@@ -1,104 +1,48 @@
 package echotrace.commands;
 
+import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.builder.RequiredArgumentBuilder;
+import com.mojang.brigadier.tree.LiteralCommandNode;
 import echotrace.commands.subcommands.ReloadCommand;
 import echotrace.commands.subcommands.TraceCommand;
-import echotrace.config.Config;
-import echotrace.config.Lang;
-import echotrace.util.MessageUtils;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabExecutor;
+import io.papermc.paper.command.brigadier.CommandSourceStack;
+import io.papermc.paper.command.brigadier.Commands;
+import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
+import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+public class CommandManager {
 
-public class CommandManager implements TabExecutor {
-
-    private static final Map<String, SubCommand> subCommands = new HashMap<>();
-
-    public CommandManager() {
-        subCommands.put("reload", new ReloadCommand());
-        subCommands.put("trace", new TraceCommand());
+    public static LiteralCommandNode<CommandSourceStack> echotrace() {
+        return Commands.literal("echotrace")
+                .then(reload())
+                .then(traceSub())
+                .build();
     }
 
-    @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
-
-        String[] routedArgs = args;
-        if (command.getName().equalsIgnoreCase("trace")) {
-            routedArgs = prepend("trace", args);
-        }
-
-        if (routedArgs.length < 1) {
-            MessageUtils.notifySender(sender, Config.prefix + Lang.echotrace_usage);
-            return true;
-        }
-
-        SubCommand subCommand = subCommands.get(routedArgs[0].toLowerCase());
-        if (subCommand == null) {
-            MessageUtils.notifySender(sender, Config.prefix + Lang.echotrace_invalid);
-            return true;
-        }
-
-        boolean playerOnly = subCommand.playerOnly();
-        String permission = subCommand.permission();
-
-        if (playerOnly && !(sender instanceof Player)) {
-            MessageUtils.notifySender(sender, Config.prefix + Lang.echotrace_player_only);
-            return true;
-        } else if (permission != null && !sender.hasPermission(permission)) {
-            MessageUtils.notifySender(sender, Config.prefix + Lang.echotrace_not_permitted);
-            return true;
-        }
-
-        return subCommand.execute(sender, routedArgs);
+    private static LiteralArgumentBuilder<CommandSourceStack> reload() {
+        return Commands.literal("reload")
+                .requires(src -> src.getSender().hasPermission("echotrace.reload"))
+                .executes(ReloadCommand::execute);
     }
 
-    @Nullable
-    @Override
-    public List<String> onTabComplete(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] strings) {
-
-        String[] routedStrings = strings;
-        if (command.getName().equalsIgnoreCase("trace")) {
-            routedStrings = prepend("trace", strings);
-        }
-
-        if (routedStrings.length == 1) {
-            List<String> commands = new ArrayList<>();
-            for (Map.Entry<String, SubCommand> entry : subCommands.entrySet()) {
-                String perm = entry.getValue().permission();
-                if (perm != null && commandSender.hasPermission(perm)) {
-                    commands.add(entry.getKey());
-                }
-            }
-            return commands;
-        }
-
-        SubCommand subCommand = subCommands.get(routedStrings[0].toLowerCase());
-        if (subCommand != null) {
-            return subCommand.tabComplete(commandSender, routedStrings);
-        }
-        return null;
+    public static LiteralCommandNode<CommandSourceStack> trace() {
+        return Commands.literal("trace")
+                .then(traceArgs())
+                .build();
     }
 
-    private static String[] prepend(String head, String[] tail) {
-        String[] out = new String[tail.length + 1];
-        out[0] = head;
-        System.arraycopy(tail, 0, out, 1, tail.length);
-        return out;
+    private static LiteralArgumentBuilder<CommandSourceStack> traceSub() {
+        return Commands.literal("trace").then(traceArgs())
+                .requires(src -> src.getSender().hasPermission("echotrace.trace"));
     }
 
-    public static void addSubCommand(String name, SubCommand subCommand) {
-        subCommands.put(name, subCommand);
+    private static RequiredArgumentBuilder<CommandSourceStack, PlayerSelectorArgumentResolver> traceArgs() {
+        return Commands.argument("target", ArgumentTypes.player())
+                .requires(src -> src.getExecutor() instanceof Player)
+                .then(Commands.argument("points", IntegerArgumentType.integer(1))
+                        .executes(ctx -> TraceCommand.execute(ctx, true)))
+                .executes(ctx -> TraceCommand.execute(ctx, false));
     }
-
-    public static void removeSubCommand(String name) {
-        subCommands.remove(name);
-    }
-
 }
