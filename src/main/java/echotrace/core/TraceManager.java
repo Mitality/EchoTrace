@@ -3,6 +3,7 @@ package echotrace.core;
 import com.github.Anon8281.universalScheduler.scheduling.tasks.MyScheduledTask;
 import echotrace.Main;
 import echotrace.config.Config;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
@@ -24,22 +25,31 @@ public class TraceManager {
     }
 
     public static void advanceTraces() {
-        activeTraces.removeIf(trace -> !trace.active());
-        for (Trace trace : activeTraces) {
-            trace.advance(Config.tracing_count);
+        if (Bukkit.getServer().getTPS()[0] < Config.min_tps) return;
+        synchronized (activeTraces) {
+            activeTraces.removeIf(trace -> !trace.active());
+            for (Trace trace : activeTraces) {
+                trace.advance(Config.tracing_count);
+            }
         }
     }
 
     public static void registerTrace(Trace trace) {
-        activeTraces.add(trace);
+        synchronized (activeTraces) {
+            activeTraces.add(trace);
+        }
     }
 
     public static void unregisterTracesFrom(Player player) {
-        activeTraces.removeIf(trace -> trace.getPlayer().getUniqueId() == player.getUniqueId());
+        synchronized (activeTraces) {
+            activeTraces.removeIf(trace -> trace.getPlayer().getUniqueId() == player.getUniqueId());
+        }
     }
 
     public static void unregisterAllTraces() {
-        activeTraces.clear();
+        synchronized (activeTraces) {
+            activeTraces.clear();
+        }
     }
 
 }

@@ -10,8 +10,28 @@ permissions:
     default: op
   echotrace.reload:
     default: op
-  echotrace.trace:
+  echotrace.trace.entities:
+    default: op
+  echotrace.trace.players:
     default: true
+  echotrace.trace.positions:
+    default: true
+  echotrace.trace.blocks:
+    default: op
+  echotrace.trace:
+    default: op
+    children:
+      echotrace.trace.entities: true
+      echotrace.trace.players: true
+      echotrace.trace.positions: true
+      echotrace.trace.blocks: true
+  echotrace.trace.*:
+    default: op
+    children:
+      echotrace.trace.entities: true
+      echotrace.trace.players: true
+      echotrace.trace.positions: true
+      echotrace.trace.blocks: true
   echotrace.*:
     default: op
     children:

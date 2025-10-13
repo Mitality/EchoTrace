@@ -15,6 +15,9 @@ public class Config {
     public static boolean client_side;
     public static long render_distance;
 
+    public static long batch_size;
+    public static double min_tps;
+
     public static Particle tracing_particle_type;
     public static double tracing_particle_speed;
     public static int tracing_particle_count;
@@ -48,6 +51,9 @@ public class Config {
 
         client_side = config.getBoolean("client-side", true);
         render_distance = config.getLong("render-distance", 64);
+
+        batch_size = config.getLong("batch-size", 1024);
+        min_tps = config.getDouble("min-tps", 19.5);
 
         tracing_particle_type = Particle.valueOf(config.getString("tracing.particle.type", "SOUL_FIRE_FLAME"));
         tracing_particle_speed = config.getDouble("tracing.particle.speed", 0.0);
