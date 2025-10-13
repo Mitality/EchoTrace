@@ -24,7 +24,7 @@ public class TraceRenderer {
             heartbeat = null;
         }
         heartbeat = Main.getScheduler()
-                .runTaskTimer(TraceRenderer::flush, 1L, 1L);
+                .runTaskTimer(TraceRenderer::render, 1L, 1L);
     }
 
     public static void queueRender(Player player, Location location, boolean isHit) {
@@ -44,10 +44,11 @@ public class TraceRenderer {
         renderQueue.add(new RenderRequest(player, location.clone(), world, isHit));
     }
 
-    public static void flush() {
+    public static void render() {
         if (renderQueue.isEmpty()) return;
         RenderRequest request;
-        while ((request = renderQueue.poll()) != null) {
+        long rendered = 0;
+        while ((request = renderQueue.poll()) != null && rendered++ < Config.render_cap) {
             request.render();
         }
     }

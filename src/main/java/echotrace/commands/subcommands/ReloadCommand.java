@@ -3,6 +3,7 @@ package echotrace.commands.subcommands;
 import com.mojang.brigadier.context.CommandContext;
 import com.tchristofferson.configupdater.ConfigUpdater;
 import echotrace.Main;
+import echotrace.commands.CommandManager;
 import echotrace.config.Config;
 import echotrace.config.Lang;
 import echotrace.core.TraceManager;
@@ -10,10 +11,14 @@ import echotrace.core.TraceRenderer;
 import echotrace.util.Logger;
 import echotrace.util.MessageUtils;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
+import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 
 import java.io.File;
+import java.util.List;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
@@ -63,7 +68,7 @@ public class ReloadCommand {
             MessageUtils.notifySender(ctx.getSource().getSender(), Config.prefix + Lang.echotrace_reload_success);
             return SINGLE_SUCCESS;
         } catch (Exception e) {
-            MessageUtils.notifySender(ctx.getSource().getSender(), Config.prefix + Lang.echotrace_reload_fail);
+            MessageUtils.notifySender(ctx.getSource().getSender(), Config.prefix + Lang.echotrace_reload_failure);
             return 0;
         }
 

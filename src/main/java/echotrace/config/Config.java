@@ -15,6 +15,8 @@ public class Config {
     public static boolean client_side;
     public static long render_distance;
 
+    public static long render_cap;
+
     public static long batch_size;
     public static double min_tps;
 
@@ -38,7 +40,9 @@ public class Config {
     public static double on_hit_sound_volume;
     public static double on_hit_sound_pitch;
 
-    public static int default_points;
+    public static long default_points;
+    public static long default_radius;
+    public static double max_radius;
     public static double turn_rate;
 
     public static void load(FileConfiguration config) {
@@ -51,6 +55,9 @@ public class Config {
 
         client_side = config.getBoolean("client-side", true);
         render_distance = config.getLong("render-distance", 64);
+
+        render_cap = config.getLong("render-cap", 1024);
+        if (render_cap <= 0) render_cap = Long.MAX_VALUE;
 
         batch_size = config.getLong("batch-size", 1024);
         min_tps = config.getDouble("min-tps", 19.5);
@@ -76,7 +83,9 @@ public class Config {
         on_hit_sound_volume = config.getDouble("on-hit.sound.volume", 0.75);
         on_hit_sound_pitch = config.getDouble("on-hit.sound.pitch", 0.25);
 
-        default_points = config.getInt("default-points", -1);
+        default_points = config.getLong("default-points", -1);
+        default_radius = config.getLong("default-radius", 25);
+        max_radius = config.getDouble("max-radius", 100);
         turn_rate = config.getDouble("turn-rate", 7.5);
 
     }

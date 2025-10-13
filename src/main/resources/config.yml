@@ -32,6 +32,11 @@ client-side: true
 # for it to be rendered with particles? (in blocks)
 render-distance: 64
 
+# How many render requests should the trace renderer
+# render each tick? Unhandled requests are delayed
+# and will be rendered when the capacity is there
+render-cap: 1024
+
 # When scanning an area for blocks to trace, we do
 # it in batches to avoid overloading your server.
 # How many blocks should we check each tick?
@@ -86,6 +91,15 @@ on-hit:
 # How many points to draw when
 # no count has been provided
 default-points: -1
+
+# How big of an area should we scan
+# when no radius has been provided?
+default-radius: 25
+
+# What should be the maximum allowed
+# search radius for block targets?
+# (requires a server restart)
+max-radius: 100
 
 # How many degrees to turn towards
 # the right direction each run

@@ -20,6 +20,9 @@ commands:
       # Message shown when starting to scan for targets
       scan: '&aScanning your area for targets...'
 
+      # Message shown when starting to check out targets
+      check: '&aChecking &6{Count}&a potential target(s)...'
+
       # Message shown on successful command execution
       success: '&aFound and traced &6{Count}&a target(s).'
 

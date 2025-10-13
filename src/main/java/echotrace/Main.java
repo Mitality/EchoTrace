@@ -100,7 +100,7 @@ public final class Main extends JavaPlugin {
         // Load language internally
         Lang.load(languageConfig);
 
-        // Commands and Listeners
+        // Register commands
         getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, event -> {
             event.registrar().register(CommandManager.echotrace(), List.of("et"));
             event.registrar().register(CommandManager.trace());

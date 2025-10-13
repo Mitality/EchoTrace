@@ -3,6 +3,7 @@ package echotrace.commands.subcommands;
 import com.github.Anon8281.universalScheduler.scheduling.tasks.MyScheduledTask;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.context.ParsedCommandNode;
@@ -72,8 +73,8 @@ public class TraceCommand {
                 .getArgument("entity", EntitySelectorArgumentResolver.class);
 
         try {
-            int pointCount = hasPointsArg ?
-                    IntegerArgumentType.getInteger(ctx, "points") : Config.default_points;
+            long pointCount = hasPointsArg ?
+                    LongArgumentType.getLong(ctx, "points") : Config.default_points;
 
             final List<Entity> targets = resolver.resolve(src);
 
@@ -118,7 +119,8 @@ public class TraceCommand {
             return SINGLE_SUCCESS;
         }
 
-        final int pointCount = hasPointsArg ? IntegerArgumentType.getInteger(ctx, "points") : Config.default_points;
+        long pointCount = hasPointsArg ?
+                LongArgumentType.getLong(ctx, "points") : Config.default_points;
 
         TraceManager.registerTrace(new Trace(player, new PlayerTarget(target), pointCount));
         MessageUtils.notifyPlayer(player, Config.prefix + Lang.echotrace_trace_success
@@ -136,8 +138,8 @@ public class TraceCommand {
                 .getArgument("position", FinePositionResolver.class);
 
         try {
-            int pointCount = hasPointsArg ?
-                    IntegerArgumentType.getInteger(ctx, "points") : Config.default_points;
+            long pointCount = hasPointsArg ?
+                    LongArgumentType.getLong(ctx, "points") : Config.default_points;
 
             FinePosition target = resolver.resolve(src);
 
@@ -177,9 +179,9 @@ public class TraceCommand {
         final Material wantMat = pattern.getMaterial();
         final boolean hasProps = pattern.getAsString(false).contains("[");
 
-        final double radius = hasRadius ? DoubleArgumentType.getDouble(ctx, "radius") : 25.0;
-        final int limit = Math.max(1, hasLimit ? IntegerArgumentType.getInteger(ctx, "limit") : 1);
-        final int points = hasPointsArg ? IntegerArgumentType.getInteger(ctx, "points") : Config.default_points;
+        final double radius = Math.max(0, hasRadius ? DoubleArgumentType.getDouble(ctx, "radius") : Config.default_radius);
+        final long limit = Math.max(1, hasLimit ? LongArgumentType.getLong(ctx, "limit") : Long.MAX_VALUE);
+        final long points = hasPointsArg ? LongArgumentType.getLong(ctx, "points") : Config.default_points;
 
         final var world = player.getWorld();
         final var loc = player.getLocation();
@@ -191,29 +193,37 @@ public class TraceCommand {
         final int maxY = Math.min(world.getMaxHeight() - 1, (int) Math.floor(cy + radius));
 
         Main.getScheduler().runTaskAsynchronously(() -> {
-            final ArrayList<int[]> offsets = new ArrayList<>((2 * R + 1) * (2 * R + 1) * (2 * R + 1));
+
+            final double baseX = (bx + 0.5) - cx;
+            final double baseY = (by + 0.5) - cy;
+            final double baseZ = (bz + 0.5) - cz;
+
+            record Offset(int dx, int dy, int dz, double d2) {}
+            final ArrayList<Offset> offsets = new ArrayList<>((2*R+1)*(2*R+1)*(2*R+1));
             for (int dy = -R; dy <= R; dy++) {
+                int y = by + dy;
+                if (y < minY || y > maxY) continue;
                 for (int dx = -R; dx <= R; dx++) {
+                    double adx = baseX + dx;
                     for (int dz = -R; dz <= R; dz++) {
-                        offsets.add(new int[]{dx, dy, dz});
+                        double adz = baseZ + dz;
+                        double ady = baseY + dy;
+
+                        double d2 = adx*adx + ady*ady + adz*adz;
+                        if (d2 > r2) continue;
+
+                        offsets.add(new Offset(dx, dy, dz, d2));
                     }
                 }
             }
+            offsets.sort(Comparator.comparingDouble(Offset::d2));
 
-            offsets.sort((a, b) -> {
-                double adx = (bx + a[0] + 0.5) - cx;
-                double ady = (by + a[1] + 0.5) - cy;
-                double adz = (bz + a[2] + 0.5) - cz;
-                double bdx = (bx + b[0] + 0.5) - cx;
-                double bdy = (by + b[1] + 0.5) - cy;
-                double bdz = (bz + b[2] + 0.5) - cz;
-                double a2 = adx * adx + ady * ady + adz * adz;
-                double b2 = bdx * bdx + bdy * bdy + bdz * bdz;
-                return Double.compare(a2, b2);
-            });
+            MessageUtils.notifyPlayer(player, Config.prefix + Lang.echotrace_trace_check
+                    .replace("{Count}", String.valueOf(offsets.size())));
 
             Main.getScheduler().execute(() -> {
-                final Iterator<int[]> it = offsets.iterator();
+
+                final Iterator<Offset> it = offsets.iterator();
                 final int[] found = {0};
 
                 AtomicReference<MyScheduledTask> taskReference = new AtomicReference<>();
@@ -228,28 +238,22 @@ public class TraceCommand {
 
                     int processed = 0;
                     while (processed++ < Math.max(1, Config.batch_size) && it.hasNext()) {
-                        int[] d = it.next();
-                        final int x = bx + d[0];
-                        final int y = by + d[1];
-                        final int z = bz + d[2];
-
-                        if (y < minY || y > maxY) continue;
-
-                        final double dx = (x + 0.5) - cx;
-                        final double dy = (y + 0.5) - cy;
-                        final double dz = (z + 0.5) - cz;
-                        if (dx * dx + dy * dy + dz * dz > r2) continue;
+                        Offset o = it.next();
+                        int x = bx + o.dx();
+                        int y = by + o.dy();
+                        int z = bz + o.dz();
 
                         if (!world.isChunkLoaded(x >> 4, z >> 4)) continue;
-                        final Chunk chunk = world.getChunkAt(x >> 4, z >> 4);
-                        final Block b = chunk.getBlock(x & 15, y, z & 15);
+                        Chunk chunk = world.getChunkAt(x >> 4, z >> 4);
+                        Block block = chunk.getBlock(x & 15, y, z & 15);
 
-                        if (b.getType() != wantMat) continue;
-                        if (hasProps && !b.getBlockData().matches(pattern)) continue;
+                        if (block.getType() != wantMat) continue;
+                        if (hasProps && !block.getBlockData().matches(pattern)) continue;
 
-                        TraceManager.registerTrace(new Trace(player, new BlockTarget(b), points));
+                        TraceManager.registerTrace(new Trace(player, new BlockTarget(block), points));
                         if (++found[0] >= limit) {
-                            MessageUtils.notifyPlayer(player, Config.prefix + Lang.echotrace_trace_success.replace("{Count}", String.valueOf(found[0])));
+                            MessageUtils.notifyPlayer(player, Config.prefix + Lang.echotrace_trace_success
+                                    .replace("{Count}", String.valueOf(found[0])));
                             MyScheduledTask self = taskReference.get();
                             if (self != null) self.cancel();
                             removeTask(uuid, self);
@@ -258,11 +262,13 @@ public class TraceCommand {
                     }
 
                     if (!it.hasNext()) {
-                        MessageUtils.notifyPlayer(player, Config.prefix + Lang.echotrace_trace_success.replace("{Count}", String.valueOf(found[0])));
+                        MessageUtils.notifyPlayer(player, Config.prefix + Lang.echotrace_trace_success
+                                .replace("{Count}", String.valueOf(found[0])));
                         MyScheduledTask self = taskReference.get();
                         if (self != null) self.cancel();
                         removeTask(uuid, self);
                     }
+
                 }, 1L, 1L);
                 taskReference.set(task);
                 addTask(uuid, task);
