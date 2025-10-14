@@ -6,6 +6,8 @@ api-version: '1.21'
 authors: [ Mitality ]
 description: Easily find your friends
 permissions:
+  echotrace.bypass.cooldowns:
+    default: op
   echotrace.update-notify:
     default: op
   echotrace.reload:
@@ -35,6 +37,7 @@ permissions:
   echotrace.*:
     default: op
     children:
+      echotrace.bypass.cooldowns: true
       echotrace.update-notify: true
       echotrace.reload: true
       echotrace.trace: true

@@ -2,7 +2,6 @@ package echotrace.commands.subcommands;
 
 import com.github.Anon8281.universalScheduler.scheduling.tasks.MyScheduledTask;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
-import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -42,6 +41,7 @@ import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 public class TraceCommand {
 
     private static final Map<UUID, List<MyScheduledTask>> ACTIVE = new ConcurrentHashMap<>();
+    private static final Map<UUID, Long> COOLDOWN = new ConcurrentHashMap<>();
 
     private static void addTask(UUID uuid, MyScheduledTask task) {
         ACTIVE.computeIfAbsent(uuid, k -> Collections.synchronizedList(new ArrayList<>())).add(task);
@@ -68,6 +68,8 @@ public class TraceCommand {
         final CommandSourceStack src = ctx.getSource();
         final Player player = (Player) src.getExecutor();
         if (player == null) return SINGLE_SUCCESS;
+
+        if (isOnCooldown(player, Config.cooldown_entity)) return SINGLE_SUCCESS;
 
         final EntitySelectorArgumentResolver resolver = ctx
                 .getArgument("entity", EntitySelectorArgumentResolver.class);
@@ -107,6 +109,8 @@ public class TraceCommand {
         final Player player = (Player) src.getExecutor();
         if (player == null) return SINGLE_SUCCESS;
 
+        if (isOnCooldown(player, Config.cooldown_player)) return SINGLE_SUCCESS;
+
         final String input = StringArgumentType.getString(ctx, "player").trim();
 
         final Player target = Bukkit.getPlayer(input);
@@ -134,6 +138,8 @@ public class TraceCommand {
         final Player player = (Player) src.getExecutor();
         if (player == null) return SINGLE_SUCCESS;
 
+        if (isOnCooldown(player, Config.cooldown_position)) return SINGLE_SUCCESS;
+
         FinePositionResolver resolver = ctx
                 .getArgument("position", FinePositionResolver.class);
 
@@ -160,6 +166,8 @@ public class TraceCommand {
         final Player player = (Player) src.getExecutor();
         if (player == null) return SINGLE_SUCCESS;
         final UUID uuid = player.getUniqueId();
+
+        if (isOnCooldown(player, Config.cooldown_block)) return SINGLE_SUCCESS;
 
         String raw = rawArg(ctx, "type");
         if (raw == null || raw.isEmpty()) return SINGLE_SUCCESS;
@@ -300,6 +308,26 @@ public class TraceCommand {
 
         MessageUtils.notifyPlayer(player, Config.prefix + Lang.echotrace_trace_cancel);
         return SINGLE_SUCCESS;
+    }
+
+    private static boolean isOnCooldown(Player player, long cooldownMillis) {
+        if (player.hasPermission("echotrace.bypass.cooldowns")) return false;
+
+        final long now = System.currentTimeMillis();
+        final UUID uuid = player.getUniqueId();
+
+        final Long until = COOLDOWN.get(uuid);
+        if (until != null) {
+            final long remainingMs = until - now;
+            if (remainingMs > 0) {
+                MessageUtils.notifyPlayer(player, Config.prefix + Lang.echotrace_trace_cooldown
+                        .replace("{Duration}", String.format("%.2f", remainingMs / 1000.0)));
+                return true; // still on cooldown
+            }
+            COOLDOWN.remove(uuid, until);
+        }
+        COOLDOWN.put(uuid, now + cooldownMillis);
+        return false;
     }
 
 }

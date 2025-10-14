@@ -12,6 +12,11 @@ public class Config {
     public static int update_check_interval;
     public static boolean releases_only;
 
+    public static long cooldown_position;
+    public static long cooldown_entity;
+    public static long cooldown_player;
+    public static long cooldown_block;
+
     public static boolean client_side;
     public static long render_distance;
 
@@ -52,6 +57,11 @@ public class Config {
 
         update_check_interval = config.getInt("update-check-interval", 12);
         releases_only = config.getBoolean("releases-only", true);
+
+        cooldown_position = config.getLong("command-cooldowns.position", 2500);
+        cooldown_entity = config.getLong("command-cooldowns.entity", 2500);
+        cooldown_player = config.getLong("command-cooldowns.player", 2500);
+        cooldown_block = config.getLong("command-cooldowns.block", 5000);
 
         client_side = config.getBoolean("client-side", true);
         render_distance = config.getLong("render-distance", 64);

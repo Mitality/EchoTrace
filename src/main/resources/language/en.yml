@@ -17,6 +17,9 @@ commands:
       # Message shown when all targets are in a different world
       wrong-world: '&eWorld/dimension mismatch.'
 
+      # Message shown when a command is rate limited
+      cooldown: '&eCommand on cooldown ({Duration}s).'
+
       # Message shown when starting to scan for targets
       scan: '&aScanning your area for targets...'
 

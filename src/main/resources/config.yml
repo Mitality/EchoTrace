@@ -24,6 +24,20 @@ update-check-interval: 12
 # prerelease or development version is available on Modrinth
 releases-only: true
 
+# Command cooldowns for commands that create new traces to
+# prevent players from spamming them to cause lag (in ms)
+command-cooldowns:
+  # /trace position [...]
+  position: 2500
+  # /trace entity [...]
+  entity: 2500
+  # /trace player [...]
+  player: 2500
+  # /trace block [...]
+  block: 5000
+# Bypassed by operators and players with the
+# echotrace.bypass.cooldowns permission node
+
 # Whether only the player executing the command should
 # be able to see and hear the summoned echo trace
 client-side: true
