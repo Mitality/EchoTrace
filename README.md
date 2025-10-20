@@ -1,3 +1,18 @@
-EchoTrace is a plugin for the kind of situation where you lost sight of a friend and don't know where to go. Instead of checking your coordinates and doing math, it allows you to spawn in visual and accustic indicators that gently point you in the right direction.
+**Are you still comparing coordinates to find your friends in game?<br>Are you tired of searching ravines for the last two remaining raiders?<br>Is there a command block somewhere that you can't seem to find?**<br>
+Don't be frustrated, EchoTrace has got you covered!
 
-The whole plugin is highly customizable, allowing you to tweak it to your liking and by default, only the command executor can see and hear traces.
+\- [configuration](https://github.com/Mitality/EchoTrace/blob/master/src/main/resources/config.yml) -
+
+**Examples:**
+|                    command / action                   |      description / explanation     |
+|:-----------------------------------------------------:|:----------------------------------:|
+|                    `/trace cancel`                    |      cancel all active traces      |
+|                 `/trace player Notch`                 |      find players named Notch      |
+|               `/trace position 0 100 0`               |       trace absolute position      |
+|               `/trace position ~3 ~5 ~7`              |       trace relative position      |
+|           `/trace entity @e[type=#raiders]`           |     find all remaining raiders     |
+|         `/trace block redstone_wire[power=0]`         |    find unpowered redstone wires   |
+|       `/trace block repeating_command_block 10`       | scan a 10 block radius for targets |
+| `/trace entity @e[type=!player,sort=nearest,limit=1]` | find the nearest non-player entity |
+
+*on default settings, only the player running the command can see and hear the resulting trace(s)*
