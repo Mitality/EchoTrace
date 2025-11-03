@@ -56,7 +56,7 @@ public class CommandManager {
         return Commands.literal("entity")
                 .requires(src -> src.getSender().hasPermission("echotrace.trace.entities"))
                 .then(Commands.argument("entity", ArgumentTypes.entities())
-                        .then(Commands.argument("points", IntegerArgumentType.integer(1))
+                        .then(Commands.argument("points", LongArgumentType.longArg(1))
                                 .executes(ctx -> TraceCommand.executeEntity(ctx, true)))
                         .executes(ctx -> TraceCommand.executeEntity(ctx, false)));
     }
@@ -71,7 +71,7 @@ public class CommandManager {
                             }
                             return b.buildFuture();
                         })
-                        .then(Commands.argument("points", IntegerArgumentType.integer(1))
+                        .then(Commands.argument("points", LongArgumentType.longArg(1))
                                 .executes(ctx -> TraceCommand.executePlayer(ctx, true)))
                         .executes(ctx -> TraceCommand.executePlayer(ctx, false)));
     }
@@ -81,7 +81,7 @@ public class CommandManager {
         return Commands.literal("position")
                 .requires(src -> src.getSender().hasPermission("echotrace.trace.positions"))
                 .then(Commands.argument("position", ArgumentTypes.finePosition(true))
-                        .then(Commands.argument("points", IntegerArgumentType.integer(1))
+                        .then(Commands.argument("points", LongArgumentType.longArg(1))
                                 .executes(ctx -> TraceCommand.executePosition(ctx, true)))
                         .executes(ctx -> TraceCommand.executePosition(ctx, false)));
     }

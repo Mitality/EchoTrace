@@ -102,18 +102,18 @@ on-hit:
     volume: 0.75
     pitch: 0.25
 
-# How many points to draw when
-# no count has been provided
-default-points: -1
+# What should be the maximum allowed
+# search radius for block targets?
+# (requires a server restart)
+max-radius: 100
 
 # How big of an area should we scan
 # when no radius has been provided?
 default-radius: 25
 
-# What should be the maximum allowed
-# search radius for block targets?
-# (requires a server restart)
-max-radius: 100
+# How many points to draw when
+# no count has been provided
+default-points: -1
 
 # How many degrees to turn towards
 # the right direction each run

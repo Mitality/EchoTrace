@@ -1,7 +1,7 @@
 package echotrace.core;
 
 import echotrace.config.Config;
-import echotrace.core.target.Target;
+import echotrace.core.targets.Target;
 import echotrace.util.TraceUtils;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;

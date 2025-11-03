@@ -9,8 +9,10 @@ import org.bukkit.Location;
 import org.bukkit.SoundCategory;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Queue;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class TraceRenderer {
@@ -42,6 +44,10 @@ public class TraceRenderer {
         ) return;
 
         renderQueue.add(new RenderRequest(player, location.clone(), world, isHit));
+    }
+
+    public static void clearQueuedRenders(@NotNull UUID uuid) {
+        renderQueue.removeIf(request -> request.player().getUniqueId().equals(uuid));
     }
 
     public static void render() {

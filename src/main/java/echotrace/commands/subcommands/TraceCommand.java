@@ -14,10 +14,11 @@ import echotrace.config.Config;
 import echotrace.config.Lang;
 import echotrace.core.Trace;
 import echotrace.core.TraceManager;
-import echotrace.core.target.BlockTarget;
-import echotrace.core.target.EntityTarget;
-import echotrace.core.target.PlayerTarget;
-import echotrace.core.target.PositionTarget;
+import echotrace.core.TraceRenderer;
+import echotrace.core.targets.BlockTarget;
+import echotrace.core.targets.EntityTarget;
+import echotrace.core.targets.PlayerTarget;
+import echotrace.core.targets.PositionTarget;
 import echotrace.util.MessageUtils;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.argument.resolvers.FinePositionResolver;
@@ -57,6 +58,7 @@ public class TraceCommand {
 
     private static void cancelAll(UUID uuid) {
         List<MyScheduledTask> list = ACTIVE.remove(uuid);
+        TraceRenderer.clearQueuedRenders(uuid);
         if (list == null || list.isEmpty()) return;
         for (MyScheduledTask task : list) {
             task.cancel();
